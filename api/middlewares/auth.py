@@ -1,36 +1,6 @@
-import time
-from jose import jwt
-from decouple import config
-from fastapi import Request, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
-
-def decode_jwt(token: str) -> dict:
-    try:
-        decoded_token = jwt.decode(token, config('JWT_SECRET'), algorithms = [config('JWT_ALGORITHM')])
-        return decoded_token if decoded_token["expires"] >= time.time() else None
-    except jwt.JWTError:
-        return {}
-
-
-def sign_jwt(user_id: str) -> str:
-    payload = {
-        "user_id": user_id,
-        "expires": time.time() + 600
-    }
-    return jwt.encode(claims = payload, key = config('JWT_SECRET'), algorithm = config('JWT_ALGORITHM'))
-
-
-def verify_jwt(jwt_token: str) -> bool:
-    is_valid_token: bool = False
-
-    try:
-        payload = decode_jwt(jwt_token)
-    except jwt.JWTError:
-        payload = None
-    if payload:
-        is_valid_token = True
-    return is_valid_token
+from fastapi import Request, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials, OAuth2PasswordBearer
+from utils.jwt import verify_jwt, decode_jwt
 
 
 class JWTBearer(HTTPBearer):
@@ -48,3 +18,14 @@ class JWTBearer(HTTPBearer):
             return credentials.credentials
         else:
             raise HTTPException(status_code = 403, detail = "Invalid authorization code.")
+
+
+reusable_oauth = OAuth2PasswordBearer(tokenUrl = "/login", scheme_name = "JWT")
+
+
+async def get_current_user(token: str = Depends(reusable_oauth)):
+    token_payload = decode_jwt(token)
+    if token_payload is None:
+        raise HTTPException(status_code = 401, detail = "unable to verify authorization token")
+    return token_payload.sub
+# here You can get data and return the user

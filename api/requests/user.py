@@ -11,6 +11,14 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "email": "merajsiddiqui@outlook.com",
+                "password": "kota@9811"
+            }
+        }
+
 
 class UserRegister(BaseModel):
     full_name: str
