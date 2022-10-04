@@ -1,30 +1,45 @@
-from fastapi import APIRouter, HTTPException
-from api.requests.user import *
-from services.auth import *
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi_jwt_auth import AuthJWT
+from schema.user import UserLogin
+from services.user import *
+from fastapi.security import HTTPBearer
 
 router = APIRouter(prefix = '/auth', tags = ['Auth'])
 
+denylist = set()
+
+
+# For this example, we are just checking if the tokens jti
+# (unique identifier) is in the denylist set. This could
+# be made more complex, for example storing the token in Redis
+# with the value true if revoked and false if not revoked
+@AuthJWT.token_in_denylist_loader
+def check_if_token_in_denylist(decrypted_token):
+    jti = decrypted_token['jti']
+    return jti in denylist
+
 
 @router.post('/login')
-async def login(login_credentials: UserLogin):
-    valid_credentials, token_or_message = validate_credentials(login_credentials.email, login_credentials.password)
-    if valid_credentials:
-        return {
-            'access': token_or_message
-        }
-    else:
-        raise HTTPException(status_code = 401, detail = token_or_message)
+def login(user: UserLogin, Authorize: AuthJWT = Depends()):
+    user = validate_credentials(user)
+    if user is None:
+        raise HTTPException(status_code = 401, detail = "Bad username or password")
+    # subject identifier for whom this token is for example id or username from database
+    access_token = Authorize.create_access_token(subject = user.email)
+    return {"access_token": access_token}
 
 
-@router.post('/register')
-async def register(user_details: UserRegister):
-    return {
-        'message': 'API working fine'
-    }
+@router.post('/refresh')
+def refresh(Authorize: AuthJWT = Depends()):
+    Authorize.jwt_refresh_token_required()
+    current_user = Authorize.get_jwt_subject()
+    new_access_token = Authorize.create_access_token(subject = current_user)
+    return {"access_token": new_access_token}
 
 
-@router.post('/logout')
-async def logout():
-    return {
-        'message': 'API working fine'
-    }
+@router.post('/logout', dependencies = [Depends(HTTPBearer())], )
+def refresh_revoke(Authorize: AuthJWT = Depends()):
+    Authorize.jwt_required()
+    jti = Authorize.get_raw_jwt()['jti']
+    denylist.add(jti)
+    return {"detail": "Access token has been revoked"}

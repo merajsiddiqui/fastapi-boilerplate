@@ -1,7 +1,7 @@
 from typing import Any
 from pydantic import BaseModel
-
-custom_encoder = lambda obj: dict(_type = type(obj).__name__, **obj.dict())
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 
 
 class HttpApiStandardResponse(BaseModel):
@@ -17,6 +17,8 @@ class HttpApiStandardResponse(BaseModel):
                 "data": []
             }
         }
-        json_encoders = {
 
-        }
+
+class StandardJsonResponse(JSONResponse):
+    def __init__(self, code: int, response: Any):
+        super().__init__(status_code = code, content = jsonable_encoder(response))
