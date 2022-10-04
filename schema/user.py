@@ -1,5 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 
 class UserTypeEnum(str, Enum):
@@ -26,3 +27,15 @@ class UserRegister(BaseModel):
     password: str
     mobile_number: str
     user_type: UserTypeEnum
+    registration_number: Optional[str]
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "full_name": "Meraj Ahmad Siddiqui",
+                "email": "merajsiddiqui@outlook.com",
+                "password": "abc123",
+                "mobile_number": "9990166950",
+                "user_type": "patient"
+            }
+        }

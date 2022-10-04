@@ -3,6 +3,7 @@ from urllib.parse import urlencode
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, session
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session
 
 
 def build_db_url():
@@ -16,9 +17,9 @@ def build_db_url():
 
 
 db_url = build_db_url()
-db_engine = create_engine(db_url, connect_args = {"check_same_thread": False})
+db_engine = create_engine(db_url)
 
-DBSession = sessionmaker(
+SessionLocal = sessionmaker(
     autocommit = False,
     autoflush = False,
     bind = db_engine
@@ -30,7 +31,7 @@ Base = declarative_base()
 class DBContext:
 
     def __init__(self):
-        self.database = DBSession()
+        self.database = SessionLocal()
 
     def __enter__(self):
         return self.database

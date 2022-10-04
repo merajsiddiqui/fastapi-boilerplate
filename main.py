@@ -5,12 +5,17 @@ from fastapi import FastAPI, Request
 from pydantic import BaseSettings
 from decouple import config
 from api.routes import __all__
+from database import models
 from api.responses.response import HttpApiStandardResponse, StandardJsonResponse
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
+from doc import open_api_details
+from config.database import db_engine
 
 # initialing fast api App
-app = FastAPI()
+app = FastAPI(**open_api_details)
+
+models.Base.metadata.create_all(bind = db_engine)
 
 origins = ["*"]
 

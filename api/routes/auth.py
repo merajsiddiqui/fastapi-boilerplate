@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi_jwt_auth import AuthJWT
-from schema.user import UserLogin
 from services.user import *
 from fastapi.security import HTTPBearer
+
 
 router = APIRouter(prefix = '/auth', tags = ['Auth'])
 
@@ -20,7 +20,7 @@ def check_if_token_in_denylist(decrypted_token):
 
 
 @router.post('/login')
-def login(user: UserLogin, Authorize: AuthJWT = Depends()):
+async def login(user: UserLogin, Authorize: AuthJWT = Depends()):
     user = validate_credentials(user)
     if user is None:
         raise HTTPException(status_code = 401, detail = "Bad username or password")
@@ -30,7 +30,7 @@ def login(user: UserLogin, Authorize: AuthJWT = Depends()):
 
 
 @router.post('/refresh')
-def refresh(Authorize: AuthJWT = Depends()):
+async def refresh(Authorize: AuthJWT = Depends()):
     Authorize.jwt_refresh_token_required()
     current_user = Authorize.get_jwt_subject()
     new_access_token = Authorize.create_access_token(subject = current_user)
@@ -38,8 +38,15 @@ def refresh(Authorize: AuthJWT = Depends()):
 
 
 @router.post('/logout', dependencies = [Depends(HTTPBearer())], )
-def refresh_revoke(Authorize: AuthJWT = Depends()):
+async def refresh_revoke(Authorize: AuthJWT = Depends()):
     Authorize.jwt_required()
     jti = Authorize.get_raw_jwt()['jti']
     denylist.add(jti)
     return {"detail": "Access token has been revoked"}
+
+
+@router.post('/register')
+async def register_user(user: UserRegister):
+    p = create_user(user)
+    return {'a': p}
+    # return StandardJsonResponse(200, User)

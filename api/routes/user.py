@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends
 from fastapi_jwt_auth import AuthJWT
 from api.middlewares.auth import JWTBearer
 
-
 router = APIRouter(prefix = '/user', dependencies = [Depends(JWTBearer())], tags = ['User'])
 
 

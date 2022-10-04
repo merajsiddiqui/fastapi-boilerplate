@@ -6,7 +6,7 @@ from config.database import Base
 class User(Base):
     __tablename__ = 'users'
 
-    id = Column('id', Integer, primary_key = True)
+    id = Column('id', Integer, primary_key = True, autoincrement = True)
     name = Column('name', String(50))
     email = Column('email', String(100), unique = True)
     password = Column('password', String(100), nullable = False)
