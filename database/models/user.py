@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
-
-Base = declarative_base()
+from config.database import Base
 
 
 class User(Base):
@@ -18,4 +16,3 @@ class User(Base):
     created_at = Column('created_at', DateTime, default = func.now())
     updated_at = Column('updated_at', DateTime, nullable = True, onupdate = func.now())
     deleted_at = Column('deleted_at', DateTime, nullable = True)
-
