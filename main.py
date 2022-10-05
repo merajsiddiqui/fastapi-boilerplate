@@ -57,6 +57,21 @@ def auth_jwt_exception_handler(req: Request, exc: AuthJWTException):
     )
 
 
+# Global exception handler
+async def catch_exceptions_middleware(request: Request, call_next):
+    try:
+        return await call_next(request)
+    except Exception:
+        # you probably want some kind of logging here
+        return StandardJsonResponse(
+            code = 500,
+            response = HttpApiStandardResponse(message = 'Something went wrong, We Messed up, we will fix it')
+        )
+
+
+app.middleware('http')(catch_exceptions_middleware)
+
+
 @app.get('/')
 def check_api():
     return {
