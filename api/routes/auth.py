@@ -29,7 +29,7 @@ async def login(user: UserLogin, Authorize: AuthJWT = Depends()):
     return {"access_token": access_token}
 
 
-@router.post('/refresh')
+@router.post('/refresh',  dependencies = [Depends(HTTPBearer())],)
 async def refresh(Authorize: AuthJWT = Depends()):
     Authorize.jwt_refresh_token_required()
     current_user = Authorize.get_jwt_subject()
