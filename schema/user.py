@@ -11,12 +11,14 @@ class UserTypeEnum(str, Enum):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+    user_type: UserTypeEnum
 
     class Config:
         schema_extra = {
             "example": {
                 "email": "merajsiddiqui@outlook.com",
-                "password": "kota@9811"
+                "password": "kota@9811",
+                "user_type": "patient"
             }
         }
 

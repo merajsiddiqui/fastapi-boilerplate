@@ -22,10 +22,8 @@ def check_if_token_in_denylist(decrypted_token):
 @router.post('/login')
 async def login(user: UserLogin, Authorize: AuthJWT = Depends()):
     user = validate_credentials(user)
-    if user is None:
-        raise HTTPException(status_code = 401, detail = "Bad username or password")
     # subject identifier for whom this token is for example id or username from database
-    access_token = Authorize.create_access_token(subject = user.email)
+    access_token = Authorize.create_access_token(subject = user.id)
     return {"access_token": access_token}
 
 

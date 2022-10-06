@@ -40,6 +40,3 @@ class DBContext:
         self.database.close()
 
 
-def get_database():
-    with DBContext() as database:
-        yield database

@@ -61,11 +61,18 @@ def auth_jwt_exception_handler(req: Request, exc: AuthJWTException):
 async def catch_exceptions_middleware(request: Request, call_next):
     try:
         return await call_next(request)
-    except Exception:
+    except Exception as e:
+        error_code = 500
+        error_message = 'Something went wrong, We Messed up, we will fix it'
+        if len(e.args) == 2:
+            error_code = e.args[0] if isinstance(e.args[0], int) else error_code
+            error_message = e.args[1] if isinstance(e.args[1], str) else error_message
+        if len(e.args) == 1:
+            error_message = e.args[0] if isinstance(e.args[0], str) else error_message
         # you probably want some kind of logging here
         return StandardJsonResponse(
-            code = 500,
-            response = HttpApiStandardResponse(message = 'Something went wrong, We Messed up, we will fix it')
+            code = error_code,
+            response = HttpApiStandardResponse(message = error_message)
         )
 
 
