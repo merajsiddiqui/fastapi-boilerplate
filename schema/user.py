@@ -41,3 +41,27 @@ class UserRegister(BaseModel):
                 "user_type": "patient"
             }
         }
+
+
+class UserMobileVerificationRequest(BaseModel):
+    mobile_number: str
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "mobile_number": "9876543210"
+            }
+        }
+
+
+class VerifyUserMobileNumber(BaseModel):
+    mobile_number: str
+    otp: str
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "mobile_number": "9876543210",
+                "otp": "123456"
+            }
+        }

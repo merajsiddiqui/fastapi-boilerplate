@@ -1,9 +1,11 @@
 import bcrypt
+import pydantic
 from sqlalchemy.sql import func
-from config.database import Base
+from config.database import Base, Config
 from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean
 
 
+@pydantic.dataclasses.dataclass(config = Config)
 class User(Base):
     __tablename__ = 'users'
 

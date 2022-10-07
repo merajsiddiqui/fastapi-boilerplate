@@ -1,9 +1,11 @@
+import pydantic
 from sqlalchemy import Column, Integer, ForeignKey, String, DateTime
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from config.database import Base
+from config.database import Base, Config
 
 
+@pydantic.dataclasses.dataclass(config = Config)
 class Doctor(Base):
     __tablename__ = 'doctors'
 

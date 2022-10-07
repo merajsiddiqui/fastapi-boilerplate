@@ -1,24 +1,13 @@
-from typing import Any
-from pydantic import BaseModel
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from typing import Generic, Optional, TypeVar
+from pydantic.generics import GenericModel
+
+DataType = TypeVar("DataType")
 
 
-class HttpApiStandardResponse(BaseModel):
-    success: bool = False
-    message: str = 'Api Request successful'
-    data: Any = {}
+class ApiResponse(GenericModel, Generic[DataType]):
+    success: bool = True
+    message: str = ""
+    data: Optional[DataType] = None
 
     class Config:
-        schema_extra = {
-            "example": {
-                "success": False,
-                "message": "Unable to Authorize user",
-                "data": []
-            }
-        }
-
-
-class StandardJsonResponse(JSONResponse):
-    def __init__(self, code: int, response: Any):
-        super().__init__(status_code = code, content = jsonable_encoder(response))
+        allow_population_by_field_name = True

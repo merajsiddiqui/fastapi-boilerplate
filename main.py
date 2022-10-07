@@ -1,12 +1,15 @@
 import importlib
+import sys
+
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseSettings
 from decouple import config
 from api.routes import __all__
 from database import models
-from api.responses.response import HttpApiStandardResponse, StandardJsonResponse
+from api.responses.response import ApiResponse
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from doc import open_api_details
@@ -51,10 +54,7 @@ def get_config():
 # in production, you can tweak performance using orjson response
 @app.exception_handler(AuthJWTException)
 def auth_jwt_exception_handler(req: Request, exc: AuthJWTException):
-    return StandardJsonResponse(
-        code = 401,
-        response = HttpApiStandardResponse(message = 'This token has been expired or invalid')
-    )
+    return ApiResponse(message = "This token is invalid or expired", success = False)
 
 
 # Global exception handler
@@ -70,10 +70,8 @@ async def catch_exceptions_middleware(request: Request, call_next):
         if len(e.args) == 1:
             error_message = e.args[0] if isinstance(e.args[0], str) else error_message
         # you probably want some kind of logging here
-        return StandardJsonResponse(
-            code = error_code,
-            response = HttpApiStandardResponse(message = error_message)
-        )
+        print(sys.exc_info())
+        return JSONResponse(status_code = error_code, content = error_message)
 
 
 app.middleware('http')(catch_exceptions_middleware)

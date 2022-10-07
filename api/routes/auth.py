@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends
 from fastapi_jwt_auth import AuthJWT
 from services.user import *
 from fastapi.security import HTTPBearer
-
+from api.responses.response import ApiResponse
+from api.responses.user import *
 
 router = APIRouter(prefix = '/auth', tags = ['Auth'])
 
@@ -19,28 +20,31 @@ def check_if_token_in_denylist(decrypted_token):
     return jti in denylist
 
 
-@router.post('/login')
-async def login(user: UserLogin, Authorize: AuthJWT = Depends()):
-    user = validate_credentials(user)
-    # subject identifier for whom this token is for example id or username from database
-    access_token = Authorize.create_access_token(subject = user.id)
-    return {"access_token": access_token}
+@router.post('/login', response_model = ApiResponse[UserLoginResponse])
+async def login(user_login: UserLogin, Authorize: AuthJWT = Depends()):
+    user = validate_credentials(user_login)
+    user_response = UserLoginResponse(
+        access_token = Authorize.create_access_token(subject = user.id),
+        refresh_token = Authorize.create_refresh_token(subject = user.id),
+        user = user
+    )
+    return ApiResponse[UserLoginResponse](data = user_response, message = "You have logged in successfully")
 
 
-@router.post('/refresh',  dependencies = [Depends(HTTPBearer())],)
+@router.post('/refresh', dependencies = [Depends(HTTPBearer())], response_model = ApiResponse[RefreshTokenResponse])
 async def refresh(Authorize: AuthJWT = Depends()):
     Authorize.jwt_refresh_token_required()
     current_user = Authorize.get_jwt_subject()
-    new_access_token = Authorize.create_access_token(subject = current_user)
-    return {"access_token": new_access_token}
+    token = RefreshTokenResponse(access_token = Authorize.create_access_token(subject = current_user))
+    return ApiResponse[RefreshTokenResponse](data = token, message = "Your token refreshed successfully ")
 
 
-@router.post('/logout', dependencies = [Depends(HTTPBearer())], )
+@router.post('/logout', dependencies = [Depends(HTTPBearer())], response_model = ApiResponse)
 async def refresh_revoke(Authorize: AuthJWT = Depends()):
     Authorize.jwt_required()
     jti = Authorize.get_raw_jwt()['jti']
     denylist.add(jti)
-    return {"detail": "Access token has been revoked"}
+    return ApiResponse(message = "Access token has been revoked")
 
 
 @router.post('/register')

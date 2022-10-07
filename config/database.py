@@ -28,6 +28,13 @@ SessionLocal = sessionmaker(
 Base = declarative_base()
 
 
+class Config:
+    arbitrary_types_allowed = True
+    orm_mode = True
+    underscore_attrs_are_private = False
+    allow_population_by_field_name = True
+
+
 class DBContext:
 
     def __init__(self):
@@ -38,5 +45,3 @@ class DBContext:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.database.close()
-
-
