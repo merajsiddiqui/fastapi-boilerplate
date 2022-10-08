@@ -44,9 +44,9 @@ def change_password(user: User, old_password: str, new_password: str):
 
 
 def mark_mobile_number_verified(mobile_number: str):
-    user = database.query(User).filter(mobile_number = mobile_number).first()
+    user = database.query(User).filter(User.mobile_number == mobile_number).first()
     user.mobile_verified = True
-    database.update(user)
+    # database.update(user)
     database.commit()
 
 

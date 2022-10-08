@@ -54,7 +54,8 @@ def get_config():
 # in production, you can tweak performance using orjson response
 @app.exception_handler(AuthJWTException)
 def auth_jwt_exception_handler(req: Request, exc: AuthJWTException):
-    return ApiResponse(message = "This token is invalid or expired", success = False)
+    print("in jwt exception")
+    return JSONResponse(status_code = 401, content = "This token is invalid or expired")
 
 
 # Global exception handler
