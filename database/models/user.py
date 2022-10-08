@@ -1,11 +1,9 @@
 import bcrypt
-import pydantic
 from sqlalchemy.sql import func
-from config.database import Base, Config
+from config.database import Base
 from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean
 
 
-@pydantic.dataclasses.dataclass(config = Config)
 class User(Base):
     __tablename__ = 'users'
 
@@ -22,7 +20,7 @@ class User(Base):
     updated_at = Column('updated_at', DateTime, nullable = True, onupdate = func.now())
     deleted_at = Column('deleted_at', DateTime, nullable = True)
 
-    def __init__(self, password, **kwargs):
+    def __init__(self, password: str, **kwargs):
         password_hash = self.generate_hash(password)
         super().__init__(password = password_hash, **kwargs)
 

@@ -30,7 +30,7 @@ Base = declarative_base()
 
 class Config:
     arbitrary_types_allowed = True
-    orm_mode = True
+    # orm_mode = True
     underscore_attrs_are_private = False
     allow_population_by_field_name = True
 

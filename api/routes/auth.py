@@ -47,8 +47,7 @@ async def refresh_revoke(Authorize: AuthJWT = Depends()):
     return ApiResponse(message = "Access token has been revoked")
 
 
-@router.post('/register')
+@router.post('/register', response_model = ApiResponse[UserModel])
 async def register_user(user: UserRegister):
-    p = create_user(user)
-    return {'a': p}
-    # return StandardJsonResponse(200, User)
+    created_user = create_user(user)
+    return ApiResponse[UserModel](data = created_user, message = "User created successfully")
